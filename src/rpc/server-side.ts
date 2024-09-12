@@ -1,6 +1,6 @@
 import Router from 'koa-router'
 
-import { Route, RouterConfig } from "./types";
+import { HttpMethod, Route, RouterConfig } from "./types";
 import { Context, Next } from 'koa';
 
 export type RouteHandler = (ctx: Context, next: Next) => Promise<void> | void;
@@ -16,7 +16,13 @@ export const buildServerRouter = <T extends RouterConfig>({routes, routeHandlers
   Object.entries(routes).forEach(([routeName, route]: [string, Route]) => {
     const handler = routeHandlers[routeName];
     
-    router.post(route.path, handler);
+    if (route.method === HttpMethod.POST) {
+      router.post(route.path, handler);
+    }
+
+    if (route.method === HttpMethod.GET) {
+      router.get(route.path, handler);
+    }
   })
 
   return router;

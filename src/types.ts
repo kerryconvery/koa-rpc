@@ -24,6 +24,7 @@ export const sortInputSchema = z.object({
 })
 
 export const candidateOutputSchema = z.object({
+  candidateId: z.number(),
   firstName: z.string(),
   lastName: z.string(),
   emailAddress: z.string(),

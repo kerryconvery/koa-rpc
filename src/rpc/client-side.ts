@@ -37,17 +37,20 @@ const buildGetMethod: RouteBuilder = (url: string, routeConfig: Route): RouteMet
       const parsedInput = routeConfig.inputType.safeParse(input);
 
       if (parsedInput.success) {
-        const response = await fetch(`${url}${routeConfig.path}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(parsedInput.data),
+        const fullUrl = Object.entries(parsedInput.data).reduce((replacedUrl: string, [parameterName, parameterValue]: [string, any]): string => {
+          return replacedUrl.replace(`:${parameterName}`, parameterValue)
+        },`${url}${routeConfig.path}`);
+
+        const response = await fetch(fullUrl, {
+          method: 'GET',
+          headers: { 'Accept-Type': 'application/json' },
         })
 
-        if (response.status !== 201) {
-          return { success: false }
+        if ([201, 200].includes(response.status)) {
+          return response.json().then((data) => ({ success: true, data }))
         }
 
-        return response.json().then((data) => ({ success: true, data }))
+        return { success: false }
       }
 
       return { success: false }

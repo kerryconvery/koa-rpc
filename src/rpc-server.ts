@@ -44,6 +44,13 @@ const sortHandler = (ctx: Context): void => {
 }
 
 const getCandidateHandler = (ctx: Context): void => {
+  ctx.response.body = {
+    candidateId: ctx.params.candidateId,
+    firstName: 'Sponge Bob',
+    lastName: 'Squarepantz',
+    emailAddress: 'squarepantz@gmail.com'
+  }
+
   ctx.response.status = 200;
 }
 
@@ -61,7 +68,7 @@ const router = buildServerRouter({
 
 const app = new Koa();
 
-app.use(bodyParser({ enableTypes: ['text', 'json'] }))
+app.use(bodyParser({ enableTypes: ['json'] }))
 app.use(router.routes());
 
 app.listen(port, () => {

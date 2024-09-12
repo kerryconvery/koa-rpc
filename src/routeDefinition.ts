@@ -45,7 +45,7 @@ export const routeDefinition = {
   },
   getCandidate: {
     method: HttpMethod.GET,
-    path: '/:candidate',
+    path: '/:candidateId',
     inputType: z.object({
       candidateId: z.number()
     }),
