@@ -23,11 +23,14 @@ export const sortInputSchema = z.object({
   direction: z.enum(['ASC', 'DESC'])
 })
 
-export const candidateOutputSchema = z.object({
-  candidateId: z.number(),
+export const candidateSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   emailAddress: z.string(),
+})
+
+export const candidateOutputSchema = candidateSchema.extend({
+  candidateId: z.number(),
 })
 
 export type CandidateOutput = z.infer<typeof candidateOutputSchema>

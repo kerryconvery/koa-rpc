@@ -3,7 +3,7 @@ import bodyParser from "koa-bodyparser";
 import { z } from 'zod'
 import { buildServerRouter } from "./rpc/server-side";
 import { routeDefinition } from './routeDefinition'
-import { echoInputSchema, splitInputSchema } from "./types";
+import { candidateSchema, echoInputSchema, splitInputSchema } from "./types";
 
 const port = 3000;
 
@@ -54,6 +54,13 @@ const getCandidateHandler = (ctx: Context): void => {
   ctx.response.status = 200;
 }
 
+const updateCandidateHandler = (ctx: Context): void => {
+  const candidateId = ctx.params.candidateId;
+  const parseResult = candidateSchema.safeParse(ctx.request.body);
+
+  ctx.response.status = parseResult.success ? 200 : 422;
+}
+
 const router = buildServerRouter({
   routes: routeDefinition,
   routeHandlers: {
@@ -63,6 +70,7 @@ const router = buildServerRouter({
     leftPad: leftPadHandler,
     sort: sortHandler,
     getCandidate: getCandidateHandler,
+    updateCandidate: updateCandidateHandler,
   }
 });
 

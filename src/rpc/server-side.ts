@@ -23,6 +23,14 @@ export const buildServerRouter = <T extends RouterConfig>({routes, routeHandlers
     if (route.method === HttpMethod.GET) {
       router.get(route.path, handler);
     }
+
+    if (route.method === HttpMethod.PUT) {
+      router.put(route.path, handler);
+    }
+
+    if (route.method === HttpMethod.DELETE) {
+      router.delete(route.path, handler);
+    }
   })
 
   return router;

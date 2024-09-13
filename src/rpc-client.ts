@@ -11,3 +11,9 @@ export type ClientSdk = typeof clientSdk
 clientSdk.echo({ value: 'hello' }).then((result) => console.log('echo:', result.data))
 clientSdk.split({ value: 'q,w,e,r,t,y', delimiter: ',' }).then((result) => console.log('split:', result.data))
 clientSdk.getCandidate({ candidateId: 1245678 }).then((result: Result<CandidateOutput>) => console.log(result.data))
+clientSdk.updateCandidate({
+  candidateId: 12456,
+  firstName: 'John',
+  lastName: 'Jones',
+  emailAddress: 'jj@gg.com'
+}).then((result: Result<void>) => console.log(result))

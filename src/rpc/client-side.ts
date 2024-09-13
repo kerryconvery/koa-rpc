@@ -29,32 +29,14 @@ const getRouteBuilder = (httpMethod: HttpMethod): RouteBuilder | undefined => {
     case HttpMethod.GET: {
       return buildGetMethod
     }
+    case HttpMethod.PUT: {
+      return buildPutMethod
+    }
+    case HttpMethod.DELETE: {
+      return buildDeleteMethod
+    }
   }
 }
-
-const buildGetMethod: RouteBuilder = (url: string, routeConfig: Route): RouteMethod => 
-  async (input: z.infer<typeof routeConfig.inputType>): Promise<Result<z.infer<typeof routeConfig.outputType>>> => {
-      const parsedInput = routeConfig.inputType.safeParse(input);
-
-      if (parsedInput.success) {
-        const fullUrl = Object.entries(parsedInput.data).reduce((replacedUrl: string, [parameterName, parameterValue]: [string, any]): string => {
-          return replacedUrl.replace(`:${parameterName}`, parameterValue)
-        },`${url}${routeConfig.path}`);
-
-        const response = await fetch(fullUrl, {
-          method: 'GET',
-          headers: { 'Accept-Type': 'application/json' },
-        })
-
-        if ([201, 200].includes(response.status)) {
-          return response.json().then((data) => ({ success: true, data }))
-        }
-
-        return { success: false }
-      }
-
-      return { success: false }
-  }
 
 const buildPostMethod: RouteBuilder = (url: string, routeConfig: Route): RouteMethod => 
   async (input: z.infer<typeof routeConfig.inputType>): Promise<Result<z.infer<typeof routeConfig.outputType>>> => {
@@ -67,12 +49,98 @@ const buildPostMethod: RouteBuilder = (url: string, routeConfig: Route): RouteMe
           body: JSON.stringify(parsedInput.data),
         })
 
-        if (response.status !== 201) {
-          return { success: false }
+        if (response.status === 201) {
+          return response.json().then((data) => ({ success: true, data }))
         }
 
-        return response.json().then((data) => ({ success: true, data }))
+        return { success: false }
       }
 
       return { success: false }
   }
+
+const buildGetMethod: RouteBuilder = (url: string, routeConfig: Route): RouteMethod => 
+  async (input: z.infer<typeof routeConfig.inputType>): Promise<Result<z.infer<typeof routeConfig.outputType>>> => {
+      const parsedInput = routeConfig.inputType.safeParse(input);
+
+      if (parsedInput.success) {
+        const [apiUrl] = buildUrl(url, routeConfig.path, parsedInput.data);
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: { 'Accept-Type': 'application/json' },
+        })
+
+        if (response.status === 200) {
+          return response.json().then((data) => ({ success: true, data }))
+        }
+
+        return { success: false }
+      }
+
+      return { success: false }
+  }
+
+const buildPutMethod: RouteBuilder = (url: string, routeConfig: Route): RouteMethod => 
+  async (input: z.infer<typeof routeConfig.inputType>): Promise<Result<z.infer<typeof routeConfig.outputType>>> => {
+      const parsedInput = routeConfig.inputType.safeParse(input);
+
+      if (parsedInput.success) {
+        const [apiUrl, usedFields] = buildUrl(url, routeConfig.path, parsedInput.data);
+        const response = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(omit(parsedInput.data, usedFields)),
+        })
+
+        if (response.status === 200) {
+          return { success: true }
+        }
+
+        return { success: false }
+      }
+
+      return { success: false }
+  }
+
+const buildDeleteMethod: RouteBuilder = (url: string, routeConfig: Route): RouteMethod => 
+  async (input: z.infer<typeof routeConfig.inputType>): Promise<Result<z.infer<typeof routeConfig.outputType>>> => {
+      const parsedInput = routeConfig.inputType.safeParse(input);
+
+      if (parsedInput.success) {
+        const [apiUrl] = buildUrl(url, routeConfig.path, parsedInput.data);
+        const response = await fetch(apiUrl, { method: 'DELETE' })
+
+        if (response.status === 204) {
+          return { success: true }
+        }
+
+        return { success: false }
+      }
+
+      return { success: false }
+  }
+
+const buildUrl = (hostUrl: string, route: string, inputData: Record<string, unknown>): [string, string[]] => {
+    return Object.entries(inputData).reduce(([replacedUrl, usedFields]: [string, string[]], [parameterName, parameterValue]: [string, any]): [string, string[]] => {
+      const newUrl = replacedUrl.replace(`:${parameterName}`, parameterValue);
+
+      if (newUrl !== replacedUrl) {
+        return [newUrl, usedFields.concat(parameterName)]
+      }
+
+      return [replacedUrl, usedFields]
+    }, [`${hostUrl}${route}`, []]);
+  }
+
+const omit = (value: Record<string, unknown>, fieldsToOmit: string[]): Record<string, unknown> => {
+  return Object.entries(value).reduce((acc: Record<string, unknown>, [key, value]: [string, unknown]): Record<string, unknown> => {
+    if (fieldsToOmit.includes(key)) {
+      return acc;
+    }
+
+    return {
+      ...acc,
+      [key]: value
+    }
+  }, {})
+}

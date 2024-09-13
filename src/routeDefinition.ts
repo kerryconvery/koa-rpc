@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { HttpMethod, RouterConfig } from './rpc/types'
-import { splitInputSchema, leftPadInputSchema, sortInputSchema, echoInputSchema, joinInputSchema, candidateOutputSchema } from './types'
+import { splitInputSchema, leftPadInputSchema, sortInputSchema, echoInputSchema, joinInputSchema, candidateOutputSchema, candidateSchema } from './types'
 
 export const routeDefinition = {
   echo: {
@@ -50,5 +50,14 @@ export const routeDefinition = {
       candidateId: z.number()
     }),
     outputType: candidateOutputSchema
+  },
+  updateCandidate: {
+    method: HttpMethod.PUT,
+    path: '/:candidateId',
+    inputType: z.object({
+      candidateId: z.number(),
+      ...candidateSchema.shape
+    }),
+    outputType: z.void()
   }
 }
