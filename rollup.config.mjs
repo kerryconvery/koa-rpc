@@ -50,9 +50,9 @@ const config = [
     ]
   },
   {
-    input: 'build/src/client-builder.js',
+    input: 'build/routeDefinition.js',
     output: {
-      file: 'dist/src/client-builder.js',
+      file: 'dist/routeDefinition.js',
       sourcemap: false,
     },
     plugins: [
@@ -60,9 +60,19 @@ const config = [
     ]
   },
   {
-    input: 'build/src/types.js',
+    input: 'build/rpc/client-side.js',
     output: {
-      file: 'dist/src/types.js',
+      file: 'dist/rpc/client-side.js',
+      sourcemap: false,
+    },
+    plugins: [
+      typescript()
+    ]
+  },
+  {
+    input: 'build/rpc/types.js',
+    output: {
+      file: 'dist/rpc/types.js',
       sourcemap: false,
     },
     plugins: [

@@ -106,5 +106,5 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": false                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["rpc-client.ts"]
+  "include": ["src/rpc-client.ts", "src/rpc/client-side.ts", "src/rpc/types.ts"]
 }

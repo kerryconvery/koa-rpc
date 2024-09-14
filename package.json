@@ -21,16 +21,12 @@
   ],
   "dependencies": {
     "@rollup/plugin-typescript": "^11.1.6",
-    "@trpc/client": "11.0.0-rc.502",
-    "@trpc/server": "11.0.0-rc.502",
     "@types/koa": "^2.15.0",
     "@types/koa-bodyparser": "^4.3.12",
     "@types/koa-router": "^7.4.8",
     "koa": "^2.15.3",
     "koa-bodyparser": "^4.4.1",
     "koa-router": "^12.0.1",
-    "koa-rpc": "file:koa-rpc-1.0.0.tgz",
-    "package.zip": "^0.0.0-beta.0",
     "rimraf": "^6.0.1",
     "rollup": "^4.21.2",
     "rollup-plugin-dts": "^6.1.1",
@@ -40,9 +36,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
     "@types/node": "^22.5.4",
-    "pkgroll": "^2.4.2",
     "rollup-plugin-generate-package-json": "^3.2.0",
     "typescript": "^5.5.4"
   }
