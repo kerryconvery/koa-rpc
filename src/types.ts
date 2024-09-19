@@ -1,23 +1,36 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
-export enum HttpMethod {
-  'GET',
-  'POST',
-  'PUT',
-  'DELETE'
-}
+export const echoInputSchema = z.object({
+  value: z.string()
+})
 
-export type Route = {
-  method: HttpMethod
-  path: string,
-  inputType: z.ZodType,
-  outputType: z.ZodType
-}
-export type RouterConfig = {
-  [key: string]: Route
-}
+export const joinInputSchema = z.object({
+  value: z.array(z.string())
+})
 
-export type Result<T> = {
-  success: boolean,
-  data?: T
-}
+export const leftPadInputSchema = z.object({
+  value: z.string(),
+  length: z.number()
+})
+
+export const splitInputSchema = z.object({
+  value: z.string(),
+  delimiter: z.string().optional().nullable()
+})
+
+export const sortInputSchema = z.object({
+  value: z.array(z.number()),
+  direction: z.enum(['ASC', 'DESC'])
+})
+
+export const candidateSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  emailAddress: z.string(),
+})
+
+export const candidateOutputSchema = candidateSchema.extend({
+  candidateId: z.number(),
+})
+
+export type CandidateOutput = z.infer<typeof candidateOutputSchema>
