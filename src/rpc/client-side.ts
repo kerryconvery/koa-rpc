@@ -1,10 +1,15 @@
 import { z } from 'zod';
 import { HttpMethod, Result, Route, RouterConfig } from './types';
 
+export type ClientSdk<T extends RouterConfig> = {
+  [K in keyof T]: (input: z.infer<T[K]['inputType']>) => Promise<Result<z.infer<T[K]['outputType']>>>
+}
+
+
 export const buildClientSdk = <T extends RouterConfig>(
   url: string,
   route: T
-): { [K in keyof T]: (input: z.infer<T[K]['inputType']>) => Promise<Result<z.infer<T[K]['outputType']>>>} => {
+): { [K in keyof T]: (input: z.infer<T[K]['inputType']>) => Promise<Result<z.infer<T[K]['outputType']>>> } => {
   const sdkMethods: Record<string, unknown> = {}
 
   Object.entries(route).forEach(([routeName, routeConfig]) => {

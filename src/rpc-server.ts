@@ -2,7 +2,7 @@ import Koa, { Context } from "koa";
 import bodyParser from "koa-bodyparser";
 import { z } from 'zod'
 import { buildServerRouter } from "./rpc/server-side";
-import { routeDefinition } from './routeDefinition'
+import { stringRouteDefinition } from './routeDefinition'
 import { candidateSchema, echoInputSchema, splitInputSchema } from "./types";
 
 const port = 3000;
@@ -62,15 +62,13 @@ const updateCandidateHandler = (ctx: Context): void => {
 }
 
 const router = buildServerRouter({
-  routes: routeDefinition,
+  routes: stringRouteDefinition,
   routeHandlers: {
     echo: echoHandler,
     join: joinHandler,
     split: splitHandler,
     leftPad: leftPadHandler,
     sort: sortHandler,
-    getCandidate: getCandidateHandler,
-    updateCandidate: updateCandidateHandler,
   }
 });
 

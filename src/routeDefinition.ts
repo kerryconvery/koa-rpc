@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { HttpMethod, RouterConfig } from './rpc/types'
+import { HttpMethod } from './rpc/types'
 import { splitInputSchema, leftPadInputSchema, sortInputSchema, echoInputSchema, joinInputSchema, candidateOutputSchema, candidateSchema } from './types'
 
-export const routeDefinition = {
+export const stringRouteDefinition = {
   echo: {
     method: HttpMethod.POST,
     path: '/echo',
@@ -42,7 +42,11 @@ export const routeDefinition = {
     outputType: z.object({ 
       value: z.string()
     })
-  },
+  }
+}
+
+
+export const candidateRouteDefinition = {
   getCandidate: {
     method: HttpMethod.GET,
     path: '/:candidateId',
