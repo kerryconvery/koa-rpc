@@ -1,12 +1,8 @@
 import { z } from 'zod';
-import { HttpMethod, Result, Route, RouterConfig } from './types';
-
-export type ClientSdk<T extends RouterConfig> = {
-  [K in keyof T]: (input: z.infer<T[K]['inputType']>) => Promise<Result<z.infer<T[K]['outputType']>>>
-}
-
+import { HttpClient, HttpMethod, Result, Route, RouterConfig } from './types';
 
 export const buildClientSdk = <T extends RouterConfig>(
+  client: HttpClient,
   url: string,
   route: T
 ): { [K in keyof T]: (input: z.infer<T[K]['inputType']>) => Promise<Result<z.infer<T[K]['outputType']>>> } => {
@@ -16,14 +12,14 @@ export const buildClientSdk = <T extends RouterConfig>(
     const routeMethod = getRouteBuilder(routeConfig.method)
 
     if (routeMethod) {
-      sdkMethods[routeName] = buildRoute(routeMethod, url, routeConfig)
+      sdkMethods[routeName] = buildRoute(routeMethod, client, url, routeConfig)
     }
   })
 
-  return sdkMethods as { [K in keyof T]: (input: z.infer<T[K]['inputType']>) => Promise<Result<z.infer<T[K]['outputType']>>> }
+  return sdkMethods as { [K in keyof T]: (input: z.infer<T[K]['inputType']>) => Promise<Result<z.infer<T[K]['outputType']>>>}
 }
 
-type RouteMethod<I, O> = (apiUrl: string, payload: I) => Promise<Result<O>>
+type RouteMethod<I, O> = (client: HttpClient, apiUrl: string, payload: I) => Promise<Result<O>>
 
 const getRouteBuilder = <I, O>(httpMethod: HttpMethod): RouteMethod<I, O> | undefined => {
   switch(httpMethod) {
@@ -42,7 +38,7 @@ const getRouteBuilder = <I, O>(httpMethod: HttpMethod): RouteMethod<I, O> | unde
   }
 }
 
-const buildRoute = <I, O>(routeMethod: RouteMethod<I, O>, url: string, routeConfig: Route): (input: I) => Promise<Result<O>> => {
+const buildRoute = <I, O>(routeMethod: RouteMethod<I, O>, client: HttpClient, url: string, routeConfig: Route): (input: I) => Promise<Result<O>> => {
   return async (input: I): Promise<Result<O>> => {
     const parsedInput = routeConfig.inputType.safeParse(input);
 
@@ -50,15 +46,15 @@ const buildRoute = <I, O>(routeMethod: RouteMethod<I, O>, url: string, routeConf
       const [apiUrl, usedFields] = buildUrl(url, routeConfig.path, parsedInput.data);
       const requestData = omit(parsedInput.data, usedFields)
 
-      return routeMethod(apiUrl, requestData as I)
+      return routeMethod(client, apiUrl, requestData as I)
     }
 
     return { success: false }
   }
 }
 
-const postMethod = async <I, O>(apiUrl: string, payload: I): Promise<Result<O>> => {
-  const response = await fetch(apiUrl, {
+const postMethod = async <I, O>(client: HttpClient, apiUrl: string, payload: I): Promise<Result<O>> => {
+  const response = await client(apiUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -71,8 +67,8 @@ const postMethod = async <I, O>(apiUrl: string, payload: I): Promise<Result<O>> 
   return { success: false }
 }
 
-const getMethod = async <I, O>(apiUrl: string): Promise<Result<O>> => {
-  const response = await fetch(apiUrl, {
+const getMethod = async <I, O>(client: HttpClient, apiUrl: string): Promise<Result<O>> => {
+  const response = await client(apiUrl, {
     method: 'GET',
     headers: { 'Accept-Type': 'application/json' },
   })
@@ -84,8 +80,8 @@ const getMethod = async <I, O>(apiUrl: string): Promise<Result<O>> => {
   return { success: false }
 }
 
-const putMethod = async <I, O>(apiUrl: string, payload: I): Promise<Result<O>> => {
-  const response = await fetch(apiUrl, {
+const putMethod = async <I, O>(client: HttpClient, apiUrl: string, payload: I): Promise<Result<O>> => {
+  const response = await client(apiUrl, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -98,8 +94,8 @@ const putMethod = async <I, O>(apiUrl: string, payload: I): Promise<Result<O>> =
   return { success: false }
 }
 
-const deleteMethod = async <I, O>(apiUrl: string): Promise<Result<O>> => {
-  const response = await fetch(apiUrl, { method: 'DELETE' })
+const deleteMethod = async <I, O>(client: HttpClient, apiUrl: string): Promise<Result<O>> => {
+  const response = await client(apiUrl, { method: 'DELETE' })
 
   if (response.status === 204) {
     return { success: true }
