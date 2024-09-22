@@ -3,7 +3,6 @@ import { HttpClient, HttpMethod, Result, Route, RouterConfig } from './types';
 
 export const buildClientSdk = <T extends RouterConfig>(
   client: HttpClient,
-  url: string,
   route: T
 ): { [K in keyof T]: (input: z.infer<T[K]['inputType']>) => Promise<Result<z.infer<T[K]['outputType']>>> } => {
   const sdkMethods: Record<string, unknown> = {}
@@ -12,7 +11,7 @@ export const buildClientSdk = <T extends RouterConfig>(
     const routeMethod = getRouteBuilder(routeConfig.method)
 
     if (routeMethod) {
-      sdkMethods[routeName] = buildRoute(routeMethod, client, url, routeConfig)
+      sdkMethods[routeName] = buildRoute(routeMethod, client, routeConfig)
     }
   })
 
@@ -38,12 +37,12 @@ const getRouteBuilder = <I, O>(httpMethod: HttpMethod): RouteMethod<I, O> | unde
   }
 }
 
-const buildRoute = <I, O>(routeMethod: RouteMethod<I, O>, client: HttpClient, url: string, routeConfig: Route): (input: I) => Promise<Result<O>> => {
+const buildRoute = <I, O>(routeMethod: RouteMethod<I, O>, client: HttpClient, routeConfig: Route): (input: I) => Promise<Result<O>> => {
   return async (input: I): Promise<Result<O>> => {
     const parsedInput = routeConfig.inputType.safeParse(input);
 
     if (parsedInput.success) {
-      const [apiUrl, usedFields] = buildUrl(url, routeConfig.path, parsedInput.data);
+      const [apiUrl, usedFields] = buildUrl(routeConfig.path, parsedInput.data);
       const requestData = omit(parsedInput.data, usedFields)
 
       return routeMethod(client, apiUrl, requestData as I)
@@ -104,7 +103,7 @@ const deleteMethod = async <I, O>(client: HttpClient, apiUrl: string): Promise<R
   return { success: false }
 }
 
-const buildUrl = (hostUrl: string, route: string, inputData: Record<string, unknown>): [string, string[]] => {
+const buildUrl = (route: string, inputData: Record<string, unknown>): [string, string[]] => {
     return Object.entries(inputData).reduce(([replacedUrl, usedFields]: [string, string[]], [parameterName, parameterValue]: [string, any]): [string, string[]] => {
       const newUrl = replacedUrl.replace(`:${parameterName}`, parameterValue);
 
@@ -113,7 +112,7 @@ const buildUrl = (hostUrl: string, route: string, inputData: Record<string, unkn
       }
 
       return [replacedUrl, usedFields]
-    }, [`${hostUrl}${route}`, []]);
+    }, [route, []]);
   }
 
 const omit = (value: Record<string, unknown>, fieldsToOmit: string[]): Record<string, unknown> => {

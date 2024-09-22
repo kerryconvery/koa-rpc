@@ -12,10 +12,9 @@ export type SdkConfig = {
 
 export type HeaderGetter = () => Promise<Record<string, string>>
 
-export const createClientSdk = <T extends RouterConfig>(routeDefinition: T, configration: SdkConfig) => {
-  return (environment: Environment, getHeaders?: HeaderGetter) => {
-    const clientSdk = buildClientSdk(createHttpClient(getHeaders), configration[environment].apiUrl, routeDefinition)
-
-    return clientSdk;
-  }
-}
+export const createClientSdk = <T extends RouterConfig>(routeDefinition: T, configration: SdkConfig) =>
+  (environment: Environment, getHeaders?: HeaderGetter) => 
+    buildClientSdk(
+      createHttpClient(configration[environment].apiUrl, getHeaders),
+      routeDefinition
+    )

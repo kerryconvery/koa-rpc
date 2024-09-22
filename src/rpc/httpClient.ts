@@ -1,10 +1,10 @@
 import { HeaderGetter } from "../client-sdk-builder";
 import { HttpClient } from "./types";
 
-export const createHttpClient = (getCustomHeaders?: HeaderGetter): HttpClient => async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+export const createHttpClient = (baseUrl: string, getCustomHeaders?: HeaderGetter): HttpClient => async (route: string, init?: RequestInit): Promise<Response> => {
   const customHeaders = getCustomHeaders ? await getCustomHeaders() : {}
 
-  return fetch(input, {
+  return fetch(`${baseUrl}${route}`, {
     ...init,
     headers: {
       ...init?.headers,

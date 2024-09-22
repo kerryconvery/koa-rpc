@@ -29,4 +29,4 @@ export type Result<T> = {
   data?: T
 }
 
-export type HttpClient = typeof fetch
+export type HttpClient = (input: string, init?: RequestInit) => Promise<Response>
